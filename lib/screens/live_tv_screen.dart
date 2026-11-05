@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:dpad/dpad.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effect.dart';
+import '../core/theme/focus_effects.dart';
 import '../providers/content_provider.dart';
 import '../models/channel.dart';
 import 'player_screen.dart';
@@ -40,7 +40,7 @@ class _ChannelTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DpadFocusable(
-      effect: StreamiaFocus.card, // Klammern entfernt
+      effects: [StreamiaFocus.card],
       onSelect: () => Navigator.push(context,
           MaterialPageRoute(builder: (_) => PlayerScreen(channel: channel, isLive: true))),
       child: Container(
