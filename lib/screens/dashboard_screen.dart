@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:dpad/dpad.dart';
 import '../providers/theme_provider.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effects.dart';
+import '../core/theme/focus_effect.dart';
 import 'live_tv_screen.dart';
 import 'vod_screen.dart';
 import 'series_screen.dart';
@@ -64,7 +64,7 @@ class DashboardScreen extends StatelessWidget {
           const Text('Streamia Player', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const Spacer(),
           DpadFocusable(
-            effects: StreamiaFocus.card, // Klammern entfernt
+            effect: StreamiaFocus.card, // Klammern entfernt
             onSelect: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PaywallScreen())),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -74,13 +74,13 @@ class DashboardScreen extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           DpadFocusable(
-            effects: StreamiaFocus.card, // Klammern entfernt
+            effect: StreamiaFocus.card, // Klammern entfernt
             onSelect: () => context.read<ThemeProvider>().toggleTheme(),
             child: Icon(isDark ? Icons.light_mode : Icons.dark_mode, size: 28),
           ),
           const SizedBox(width: 16),
           DpadFocusable(
-            effects: StreamiaFocus.card, // Klammern entfernt
+            effect: StreamiaFocus.card, // Klammern entfernt
             onSelect: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
             child: const Icon(Icons.settings, size: 28),
           ),
@@ -100,7 +100,7 @@ class _DashboardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DpadFocusable(
-      effects: StreamiaFocus.card, // Klammern entfernt
+      effect: StreamiaFocus.card, // Klammern entfernt
       onSelect: onTap,
       child: Container(
         decoration: BoxDecoration(
