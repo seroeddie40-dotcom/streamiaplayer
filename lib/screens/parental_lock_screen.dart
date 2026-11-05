@@ -82,7 +82,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
             spacing: 12, runSpacing: 12,
             children: [
               ...List.generate(9, (i) => DpadFocusable(
-                effect: StreamiaFocus.card,
+                effects: StreamiaFocus.card, // Hier wurde 'effect' zu 'effects' geändert
                 onSelect: () => _onDigit('${i + 1}'),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -91,7 +91,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                 ),
               )),
               DpadFocusable(
-                effect: StreamiaFocus.card,
+                effects: StreamiaFocus.card, // Hier wurde 'effect' zu 'effects' geändert
                 onSelect: () => setState(() => _entered = ''),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -100,7 +100,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                 ),
               ),
               DpadFocusable(
-                effect: StreamiaFocus.card,
+                effects: StreamiaFocus.card, // Hier wurde 'effect' zu 'effects' geändert
                 onSelect: () => _onDigit('0'),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -132,7 +132,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                     itemBuilder: (context, i) {
                       final f = folders[i];
                       return DpadFocusable(
-                        effect: StreamiaFocus.card,
+                        effects: StreamiaFocus.card, // Hier wurde 'effect' zu 'effects' geändert
                         onSelect: () async {
                           final newList = List<String>.from(folders)..remove(f);
                           await _prefs!.setLockedFolders(newList);
