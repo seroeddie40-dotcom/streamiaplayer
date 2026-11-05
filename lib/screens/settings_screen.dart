@@ -29,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(32),
         children: [
           DpadFocusable(
-            effect: StreamiaFocus.card,
+            effects: [StreamiaFocus.card], // Geändert zu effects
             onSelect: () => theme.toggleTheme(),
             child: ListTile(
               title: const Text('Dark / Light Mode'),
@@ -42,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
             child: Text('Sprache', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
           ..._languages.map((lang) => DpadFocusable(
-            effect: StreamiaFocus.card,
+            effects: [StreamiaFocus.card], // Geändert zu effects
             onSelect: () => locale.setLocale(lang.$1),
             child: ListTile(
               title: Text(lang.$2),
@@ -52,7 +52,7 @@ class SettingsScreen extends StatelessWidget {
           )),
           const Divider(),
           DpadFocusable(
-            effect: StreamiaFocus.card,
+            effects: [StreamiaFocus.card], // Geändert zu effects
             onSelect: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const ParentalLockScreen())),
             child: const ListTile(
@@ -61,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           DpadFocusable(
-            effect: StreamiaFocus.card,
+            effects: [StreamiaFocus.card], // Geändert zu effects
             onSelect: () async {
               await auth.logout();
               if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
