@@ -144,7 +144,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
               child: Row(
                 children: [
                   DpadFocusable(
-                    effects: [StreamiaFocus.card],
+                    effects: StreamiaFocus.card,
                     onSelect: () => Navigator.pop(context),
                     child: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
                   ),
