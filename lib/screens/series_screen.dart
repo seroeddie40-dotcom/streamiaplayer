@@ -39,7 +39,7 @@ class _SeriesTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DpadFocusable(
-      effect: StreamiaFocus.card,
+      effects: [StreamiaFocus.card], // Geändert zu effects
       onSelect: () => Navigator.push(context,
           MaterialPageRoute(builder: (_) => SeriesDetailScreen(series: series))),
       child: Container(
@@ -138,7 +138,7 @@ class _SeasonSection extends StatelessWidget {
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const Spacer(),
               DpadFocusable(
-                effect: StreamiaFocus.card,
+                effects: [StreamiaFocus.card], // Geändert zu effects
                 onSelect: () => _downloadSeason(context),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -159,7 +159,7 @@ class _SeasonSection extends StatelessWidget {
           ),
         ),
         ...season.episodes.map((ep) => DpadFocusable(
-          effect: StreamiaFocus.card,
+          effects: [StreamiaFocus.card], // Geändert zu effects
           onSelect: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => PlayerScreen(
                 episodes: season.episodes,
@@ -171,7 +171,7 @@ class _SeasonSection extends StatelessWidget {
             leading: CircleAvatar(child: Text('${ep.number}')),
             title: Text(ep.title),
             trailing: DpadFocusable(
-              effect: StreamiaFocus.card,
+              effects: [StreamiaFocus.card], // Geändert zu effects
               onSelect: () async {
                 try {
                   await DownloadService.download(
