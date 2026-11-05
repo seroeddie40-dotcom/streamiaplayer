@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dpad/dpad.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/storage/prefs_service.dart';
-import '../core/theme/focus_effect.dart';
+import '../core/theme/focus_effects.dart';
 
 class ParentalLockScreen extends StatefulWidget {
   const ParentalLockScreen({super.key});
@@ -82,7 +82,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
             spacing: 12, runSpacing: 12,
             children: [
               ...List.generate(9, (i) => DpadFocusable(
-                effect: StreamiaFocus.card, // OHNE eckige Klammern
+                effects: [StreamiaFocus.card], 
                 onSelect: () => _onDigit('${i + 1}'),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -91,7 +91,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                 ),
               )),
               DpadFocusable(
-                effect: StreamiaFocus.card, // OHNE eckige Klammern
+                effects: [StreamiaFocus.card],
                 onSelect: () => setState(() => _entered = ''),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -100,7 +100,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                 ),
               ),
               DpadFocusable(
-                effect: StreamiaFocus.card, // OHNE eckige Klammern
+                effects: [StreamiaFocus.card],
                 onSelect: () => _onDigit('0'),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -132,7 +132,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                     itemBuilder: (context, i) {
                       final f = folders[i];
                       return DpadFocusable(
-                        effect: StreamiaFocus.card, // OHNE eckige Klammern
+                        effects: [StreamiaFocus.card],
                         onSelect: () async {
                           final newList = List<String>.from(folders)..remove(f);
                           await _prefs!.setLockedFolders(newList);
