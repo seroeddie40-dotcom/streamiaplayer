@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.streamia.streamia_player"
-        minSdk = 21 // Erforderlich für den Video-Player (media_kit)
+        minSdk = 21
         targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
