@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.streamia.streamia_player"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
