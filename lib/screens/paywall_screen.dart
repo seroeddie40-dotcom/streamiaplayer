@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dpad/dpad.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effect.dart';
+import '../core/theme/focus_effects.dart';
 
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
@@ -33,7 +33,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               children: List.generate(periods.length, (i) => Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: DpadFocusable(
-                  effect: StreamiaFocus.card, // Klammern entfernt
+                  effects: [StreamiaFocus.card],
                   onSelect: () => setState(() => _selectedPeriod = i),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -56,7 +56,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: DpadFocusable(
-                      effect: StreamiaFocus.card, // Klammern entfernt
+                      effects: [StreamiaFocus.card],
                       onSelect: () => setState(() => _selectedTier = i),
                       child: Container(
                         decoration: BoxDecoration(
@@ -87,7 +87,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ),
             const SizedBox(height: 32),
             DpadFocusable(
-              effect: StreamiaFocus.card, // Klammern entfernt
+              effects: [StreamiaFocus.card],
               onSelect: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Zahlungsintegration folgt')),
