@@ -68,7 +68,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 32),
                 DpadFocusable(
                   autofocus: true,
-                  effects: StreamiaFocus.card,
+                  effect: StreamiaFocus.card,
                   onSelect: () => Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (_) => const DashboardScreen()),
                   ),
