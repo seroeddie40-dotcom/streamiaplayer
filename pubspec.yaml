@@ -13,7 +13,7 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: ^2.2.2
   media_kit: ^1.1.10
-  media_kit_video: 1.2.4  # WICHTIG: Auf diese Version festgelegt für Flutter 3.24.0
+  media_kit_video: 1.2.4
   media_kit_libs_video: ^1.0.4
   http: ^1.1.0
   xml: ^6.5.0
@@ -25,6 +25,8 @@ dependencies:
   google_fonts: ^6.1.0
   dio: ^5.4.0
   wakelock_plus: 1.2.8
+  file_picker: ^8.1.7 # WICHTIG: Diese Version behebt den Kompilierungsfehler
+  universal_html: ^2.2.4
 
 dev_dependencies:
   flutter_test:
