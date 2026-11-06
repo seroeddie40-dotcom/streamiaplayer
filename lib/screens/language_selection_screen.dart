@@ -34,7 +34,6 @@ class LanguageSelectionScreen extends StatelessWidget {
                 children: _languages.map((lang) {
                   return InkWell(
                     onTap: () {
-                      // Setzt die Sprache. app.dart reagiert darauf und leitet weiter.
                       context.read<LocaleProvider>().setLocale(lang.$1);
                     },
                     child: Container(
