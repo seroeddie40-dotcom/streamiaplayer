@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dpad/dpad.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/storage/prefs_service.dart';
-import '../core/theme/focus_effects.dart';
 
 class ParentalLockScreen extends StatefulWidget {
   const ParentalLockScreen({super.key});
@@ -81,27 +79,24 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
           child: Wrap(
             spacing: 12, runSpacing: 12,
             children: [
-              ...List.generate(9, (i) => DpadFocusable(
-                effect: StreamiaFocus.card,
-                onSelect: () => _onDigit('${i + 1}'),
+              ...List.generate(9, (i) => InkWell(
+                onTap: () => _onDigit('${i + 1}'),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
                   decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8)),
                   child: Text('${i + 1}', style: const TextStyle(fontSize: 24)),
                 ),
               )),
-              DpadFocusable(
-                effect: StreamiaFocus.card,
-                onSelect: () => setState(() => _entered = ''),
+              InkWell(
+                onTap: () => setState(() => _entered = ''),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
                   decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8)),
                   child: const Icon(Icons.clear),
                 ),
               ),
-              DpadFocusable(
-                effect: StreamiaFocus.card,
-                onSelect: () => _onDigit('0'),
+              InkWell(
+                onTap: () => _onDigit('0'),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
                   decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8)),
@@ -131,9 +126,8 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                     itemCount: folders.length,
                     itemBuilder: (context, i) {
                       final f = folders[i];
-                      return DpadFocusable(
-                        effect: StreamiaFocus.card,
-                        onSelect: () async {
+                      return InkWell(
+                        onTap: () async {
                           final newList = List<String>.from(folders)..remove(f);
                           await _prefs!.setLockedFolders(newList);
                           setState(() {});
