@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:dpad/dpad.dart';
 import '../providers/auth_provider.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effects.dart';
 import 'dashboard_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -66,10 +64,8 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                DpadFocusable(
-                  autofocus: true,
-                  effect: StreamiaFocus.card,
-                  onSelect: () => Navigator.of(context).pushReplacement(
+                InkWell(
+                  onTap: () => Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (_) => const DashboardScreen()),
                   ),
                   child: Container(
