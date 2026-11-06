@@ -12,9 +12,8 @@ dependencies:
     sdk: flutter
   provider: ^6.1.1
   shared_preferences: ^2.2.2
-  
   media_kit: ^1.1.10
-  media_kit_video: ^1.2.4
+  media_kit_video: 1.2.4  # WICHTIG: Auf diese Version festgelegt für Flutter 3.24.0
   media_kit_libs_video: ^1.0.4
   http: ^1.1.0
   xml: ^6.5.0
