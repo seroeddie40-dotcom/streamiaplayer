@@ -19,6 +19,6 @@ class LocaleProvider extends ChangeNotifier {
     _hasSelected = true;
     await _prefs.setLocale(code);
     await _prefs.setLanguageSelected();
-    notifyListeners();
+    notifyListeners(); // Wichtig: App neu rendern
   }
 }
