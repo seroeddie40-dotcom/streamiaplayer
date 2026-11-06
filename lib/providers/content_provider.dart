@@ -8,11 +8,15 @@ class ContentProvider extends ChangeNotifier {
   List<VodItem> _vodItems = [];
   List<Series> _series = [];
   bool _isLoaded = false;
+  
+  // Das hier hat gefehlt:
+  final List<Channel> _recentHistory = [];
 
   List<Channel> get channels => _channels;
   List<VodItem> get vodItems => _vodItems;
   List<Series> get series => _series;
   bool get isLoaded => _isLoaded;
+  List<Channel> get recentHistory => List.unmodifiable(_recentHistory);
 
   void setChannels(List<Channel> list) { _channels = list; notifyListeners(); }
   void setVod(List<VodItem> list) { _vodItems = list; notifyListeners(); }
@@ -24,6 +28,9 @@ class ContentProvider extends ChangeNotifier {
   }
 
   void addToHistory(Channel channel) {
-    // Wird später für den Verlauf genutzt
+    _recentHistory.removeWhere((c) => c.id == channel.id);
+    _recentHistory.insert(0, channel);
+    if (_recentHistory.length > 10) _recentHistory.removeLast();
+    notifyListeners();
   }
 }
