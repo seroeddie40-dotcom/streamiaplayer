@@ -6,8 +6,9 @@ import 'core/theme/app_theme.dart';
 import 'core/localization/app_localizations.dart';
 import 'providers/theme_provider.dart';
 import 'providers/locale_provider.dart';
-import 'providers/auth_provider.dart';
+import 'providers/content_provider.dart';
 import 'screens/language_selection_screen.dart';
+import 'screens/setup_screen.dart';
 import 'screens/dashboard_screen.dart';
 
 class StreamiaApp extends StatelessWidget {
@@ -17,6 +18,7 @@ class StreamiaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     final localeProvider = context.watch<LocaleProvider>();
+    final contentProvider = context.watch<ContentProvider>();
 
     return MaterialApp(
       title: 'Streamia Player',
@@ -32,17 +34,22 @@ class StreamiaApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: _resolveHome(localeProvider),
+      home: _resolveHome(localeProvider, contentProvider),
     );
   }
 
-  Widget _resolveHome(LocaleProvider locale) {
-    // Wenn die Sprache noch nicht gewählt wurde -> Sprachauswahl
+  Widget _resolveHome(LocaleProvider locale, ContentProvider content) {
+    // 1. Sprache noch nicht gewählt -> Sprachauswahl
     if (!locale.hasSelectedLanguage) {
       return const LanguageSelectionScreen();
     }
-    // Wenn die Sprache schon gewählt ist -> Direkt ins Dashboard
-    // (Hier kannst du später die Playlist-Abfrage oder den Login einbauen)
+    
+    // 2. Sprache gewählt, aber keine Playlist geladen -> Setup Screen
+    if (!content.isLoaded) {
+      return const SetupScreen();
+    }
+    
+    // 3. Alles bereit -> Dashboard
     return const DashboardScreen();
   }
 }
