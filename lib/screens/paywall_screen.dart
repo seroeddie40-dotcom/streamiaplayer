@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dpad/dpad.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effects.dart';
 
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
@@ -32,9 +30,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(periods.length, (i) => Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: DpadFocusable(
-                  effect: StreamiaFocus.card,
-                  onSelect: () => setState(() => _selectedPeriod = i),
+                child: InkWell(
+                  onTap: () => setState(() => _selectedPeriod = i),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     decoration: BoxDecoration(
@@ -55,9 +52,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 children: List.generate(tiers.length, (i) => Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: DpadFocusable(
-                      effect: StreamiaFocus.card,
-                      onSelect: () => setState(() => _selectedTier = i),
+                    child: InkWell(
+                      onTap: () => setState(() => _selectedTier = i),
                       child: Container(
                         decoration: BoxDecoration(
                           color: _selectedTier == i ? AppTheme.electricBlue.withOpacity(0.15) : null,
@@ -86,9 +82,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            DpadFocusable(
-              effect: StreamiaFocus.card,
-              onSelect: () {
+            InkWell(
+              onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Zahlungsintegration folgt')),
                 );
