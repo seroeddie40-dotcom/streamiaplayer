@@ -27,7 +27,12 @@ class StreamiaApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
       locale: localeProvider.locale,
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: const [
+        _AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: _resolveHome(authProvider, localeProvider),
     );
   }
