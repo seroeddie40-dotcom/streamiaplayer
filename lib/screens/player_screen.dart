@@ -144,7 +144,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
               child: Row(
                 children: [
                   DpadFocusable(
-                    effects: [StreamiaFocus.card],
+                    effects: StreamiaFocus.card,
                     onSelect: () => Navigator.pop(context),
                     child: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
                   ),
@@ -156,7 +156,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   ),
                   if (widget.isLive)
                     DpadFocusable(
-                      effects: [StreamiaFocus.card],
+                      effects: StreamiaFocus.card,
                       onSelect: _toggleRecording,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -184,13 +184,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
               children: [
                 if (widget.episodes != null)
                   DpadFocusable(
-                    effects: [StreamiaFocus.card],
+                    effects: StreamiaFocus.card,
                     onSelect: () { if (_currentEpisode > 0) { setState(() => _currentEpisode--); _loadStream(); } },
                     child: const Icon(Icons.skip_previous, color: Colors.white, size: 40),
                   ),
                 if (widget.episodes != null) const SizedBox(width: 32),
                 DpadFocusable(
-                  effects: [StreamiaFocus.card],
+                  effects: StreamiaFocus.card,
                   onSelect: () => _playing ? _player.pause() : _player.play(),
                   child: Icon(_playing ? Icons.pause_circle : Icons.play_circle,
                       color: Colors.white, size: 72),
@@ -198,7 +198,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 if (widget.episodes != null) const SizedBox(width: 32),
                 if (widget.episodes != null)
                   DpadFocusable(
-                    effects: [StreamiaFocus.card],
+                    effects: StreamiaFocus.card,
                     onSelect: () {
                       if (widget.episodes != null && _currentEpisode < widget.episodes!.length - 1) {
                         setState(() => _currentEpisode++);
@@ -217,13 +217,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 children: [
                   if (widget.episodes != null)
                     DpadFocusable(
-                      effects: [StreamiaFocus.card],
+                      effects: StreamiaFocus.card,
                       onSelect: () => setState(() => _showDrawer = true),
                       child: _pill('Folgen', Icons.list),
                     ),
                   const SizedBox(width: 12),
                   DpadFocusable(
-                    effects: [StreamiaFocus.card],
+                    effects: StreamiaFocus.card,
                     onSelect: () => setState(() => _showHistory = !_showHistory),
                     child: _pill('Verlauf', Icons.history),
                   ),
@@ -297,7 +297,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                   const Spacer(),
                   DpadFocusable(
-                    effects: [StreamiaFocus.card],
+                    effects: StreamiaFocus.card,
                     onSelect: () => setState(() => _showHistory = false),
                     child: const Icon(Icons.close, color: Colors.white),
                   ),
@@ -310,7 +310,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 itemBuilder: (context, i) {
                   final ch = history[i];
                   return DpadFocusable(
-                    effects: [StreamiaFocus.card],
+                    effects: StreamiaFocus.card,
                     onSelect: () {
                       setState(() => _showHistory = false);
                       _player.open(Media(ch.streamUrl));
@@ -343,7 +343,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
           itemBuilder: (context, i) {
             final ep = widget.episodes![i];
             return DpadFocusable(
-              effects: [StreamiaFocus.card],
+              effects: StreamiaFocus.card,
               onSelect: () {
                 setState(() { _currentEpisode = i; _showDrawer = false; });
                 _loadStream();
