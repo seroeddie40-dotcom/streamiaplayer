@@ -28,7 +28,7 @@ class StreamiaApp extends StatelessWidget {
       locale: localeProvider.locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
-        _AppLocalizationsDelegate(),
+        AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
