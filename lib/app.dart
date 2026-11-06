@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:dpad/dpad.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/localization/app_localizations.dart';
@@ -29,7 +28,6 @@ class StreamiaApp extends StatelessWidget {
       locale: localeProvider.locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      builder: Dpad.wrap(),
       home: _resolveHome(authProvider, localeProvider),
     );
   }
