@@ -1,24 +1,23 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/channel.dart';
 import '../models/vod_item.dart';
 import '../models/series.dart';
+import '../providers/content_provider.dart';
 
 class PlaylistParser {
   static Future<void> parseAndLoad(String urlOrContent, ContentProvider content) async {
-    String content = urlOrContent;
+    String contentText = urlOrContent;
     
-    // Wenn es eine URL ist, laden wir den Inhalt herunter
     if (urlOrContent.startsWith('http')) {
       final response = await http.get(Uri.parse(urlOrContent));
       if (response.statusCode == 200) {
-        content = response.body;
+        contentText = response.body;
       } else {
         throw Exception('Fehler beim Herunterladen der Playlist');
       }
     }
 
-    final lines = content.split('\n');
+    final lines = contentText.split('\n');
     final channels = <Channel>[];
     final vodItems = <VodItem>[];
     final seriesMap = <String, Series>{};
@@ -32,7 +31,6 @@ class PlaylistParser {
       final line = lines[i].trim();
       
       if (line.startsWith('#EXTINF:')) {
-        // Metadaten auslesen
         final nameMatch = RegExp(r',(.+)$').firstMatch(line);
         currentName = nameMatch?.group(1)?.trim();
 
@@ -45,11 +43,9 @@ class PlaylistParser {
       } else if (line.startsWith('http') && currentName != null) {
         currentUrl = line;
         
-        // Logik zum Sortieren: Ist es ein Film, eine Serie oder Live-TV?
         final isMovie = currentUrl.endsWith('.mp4') || currentUrl.endsWith('.mkv') || currentUrl.endsWith('.avi');
         
         if (isMovie) {
-          // VOD Film
           vodItems.add(VodItem(
             id: 'vod_${vodItems.length}',
             title: currentName,
@@ -57,10 +53,8 @@ class PlaylistParser {
             streamUrl: currentUrl,
           ));
         } else if (currentGroup != null && (currentGroup.toLowerCase().contains('serie') || currentGroup.toLowerCase().contains('series'))) {
-          // Serie
-          final seriesTitle = currentGroup; // Nutze den Gruppen-Namen als Serientitel
+          final seriesTitle = currentGroup; 
           
-          // Erstelle eine Episode
           final epNumber = seriesMap[seriesTitle]?.seasons.first.episodes.length ?? 0;
           final newEpisode = Episode(
             id: 'ep_${seriesTitle}_$epNumber',
@@ -80,7 +74,6 @@ class PlaylistParser {
             );
           }
         } else {
-          // Live TV Sender
           channels.add(Channel(
             id: 'ch_${channels.length}',
             name: currentName,
@@ -90,7 +83,6 @@ class PlaylistParser {
           ));
         }
         
-        // Reset für nächste Zeile
         currentName = null;
         currentLogo = null;
         currentGroup = null;
@@ -98,7 +90,6 @@ class PlaylistParser {
       }
     }
 
-    // Daten in den Provider laden
     content.setChannels(channels);
     content.setVod(vodItems);
     content.setSeries(seriesMap.values.toList());
