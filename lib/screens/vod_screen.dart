@@ -59,7 +59,7 @@ class _VodTileState extends State<_VodTile> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DpadFocusable(
-      effects: StreamiaFocus.card,
+      effect: StreamiaFocus.card,
       onSelect: () => Navigator.push(context,
           MaterialPageRoute(builder: (_) => PlayerScreen(
             streamUrl: widget.item.streamUrl,
@@ -85,7 +85,7 @@ class _VodTileState extends State<_VodTile> {
                   Positioned(
                     right: 8, top: 8,
                     child: DpadFocusable(
-                      effects: StreamiaFocus.card,
+                      effect: StreamiaFocus.card,
                       onSelect: _download,
                       child: Container(
                         padding: const EdgeInsets.all(8),
