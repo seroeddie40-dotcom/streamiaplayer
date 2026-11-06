@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:dpad/dpad.dart';
 import '../providers/locale_provider.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effects.dart';
 import 'splash_screen.dart';
 
 class LanguageSelectionScreen extends StatelessWidget {
@@ -32,9 +30,8 @@ class LanguageSelectionScreen extends StatelessWidget {
               Wrap(
                 spacing: 16, runSpacing: 16,
                 children: _languages.map((lang) {
-                  return DpadFocusable(
-                    effect: StreamiaFocus.card,
-                    onSelect: () {
+                  return InkWell(
+                    onTap: () {
                       context.read<LocaleProvider>().setLocale(lang.$1);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (_) => const SplashScreen()),
