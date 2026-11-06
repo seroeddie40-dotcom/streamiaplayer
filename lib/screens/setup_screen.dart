@@ -9,6 +9,7 @@ import 'dart:convert';
 import '../providers/auth_provider.dart';
 import '../providers/content_provider.dart';
 import '../services/playlist_parser.dart';
+import '../core/localization/app_localizations.dart';
 import '../core/theme/app_theme.dart';
 import 'dashboard_screen.dart';
 
@@ -133,58 +134,26 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Playlist einrichten'),
+        title: Text(l10n.t('setup_title')),
         automaticallyImplyLeading: false,
       ),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : Column(
             children: [
-              if (_qrLink != null)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  color: AppTheme.darkSurface,
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        color: Colors.white,
-                        child: QrImageView(data: _qrLink!, size: 80),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Handy-Setup', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            const Text('Scanne den QR-Code, um die Daten bequem per Handy einzugeben.', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                            const SizedBox(height: 8),
-                            Text('MAC: ${auth.macAddress}', style: const TextStyle(fontFamily: 'monospace', color: AppTheme.electricBlue)),
-                            const SizedBox(height: 8),
-                            TextButton(
-                              onPressed: _checkForRemoteInput,
-                              child: const Text('Daten vom Handy abrufen'),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              
               TabBar(
                 controller: _tabController,
                 indicatorColor: AppTheme.electricBlue,
                 labelColor: AppTheme.electricBlue,
                 unselectedLabelColor: Colors.grey,
-                tabs: const [
-                  Tab(text: 'M3U / EPG'),
-                  Tab(text: 'Xtream Codes'),
+                tabs: [
+                  Tab(text: l10n.t('tab_m3u')),
+                  Tab(text: l10n.t('tab_xtream')),
                 ],
               ),
               
@@ -192,8 +161,8 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildM3uTab(),
-                    _buildXtreamTab(),
+                    _buildM3uTab(l10n, auth),
+                    _buildXtreamTab(l10n),
                   ],
                 ),
               ),
@@ -217,7 +186,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bitte Daten eingeben')));
                       }
                     },
-                    child: const Text('Speichern & Starten', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    child: Text(l10n.t('btn_start'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
@@ -226,13 +195,13 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildM3uTab() {
+  Widget _buildM3uTab(AppLocalizations l10n, AuthProvider auth) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('M3U Playlist URL', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(l10n.t('m3u_url'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
           TextField(
             controller: _m3uController,
@@ -243,7 +212,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
             ),
           ),
           const SizedBox(height: 16),
-          const Text('EPG (XMLTV) URL (Optional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(l10n.t('epg_url'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
           TextField(
             controller: _epgController,
@@ -254,14 +223,14 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
             ),
           ),
           const SizedBox(height: 32),
-          const Row(
+          Row(
             children: [
-              Expanded(child: Divider()),
+              const Expanded(child: Divider()),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text('ODER', style: TextStyle(color: Colors.grey)),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(l10n.t('or'), style: const TextStyle(color: Colors.grey)),
               ),
-              Expanded(child: Divider()),
+              const Expanded(child: Divider()),
             ],
           ),
           const SizedBox(height: 32),
@@ -271,7 +240,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 child: OutlinedButton.icon(
                   onPressed: () => _pickFile(true),
                   icon: const Icon(Icons.folder_open),
-                  label: const Text('M3U vom Handy'),
+                  label: Text(l10n.t('btn_m3u_phone')),
                 ),
               ),
               const SizedBox(width: 16),
@@ -279,7 +248,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 child: OutlinedButton.icon(
                   onPressed: () => _pickFile(false),
                   icon: const Icon(Icons.calendar_today),
-                  label: const Text('EPG vom Handy'),
+                  label: Text(l10n.t('btn_epg_phone')),
                 ),
               ),
             ],
@@ -289,18 +258,54 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('USB-Stick durchsuchen (benötigt Android TV) ...')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('USB-Stick durchsuchen...')));
               },
               icon: const Icon(Icons.usb),
-              label: const Text('Von USB-Stick laden (TV)'),
+              label: Text(l10n.t('btn_usb')),
             ),
           ),
+          const SizedBox(height: 32),
+          
+          if (_qrLink != null)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.darkSurface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.electricBlue.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.white,
+                    child: QrImageView(data: _qrLink!, size: 80),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l10n.t('qr_title'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text(l10n.t('qr_desc'), style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: _checkForRemoteInput,
+                          child: Text(l10n.t('qr_btn')),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildXtreamTab() {
+  Widget _buildXtreamTab(AppLocalizations l10n) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -308,18 +313,18 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
         children: [
           TextField(
             controller: _xtreamServerController,
-            decoration: const InputDecoration(labelText: 'Server URL', hintText: 'http://server.com:8080', border: OutlineInputBorder()),
+            decoration: InputDecoration(labelText: l10n.t('xtream_server'), hintText: 'http://server.com:8080', border: const OutlineInputBorder()),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _xtreamUserController,
-            decoration: const InputDecoration(labelText: 'Benutzername', border: OutlineInputBorder()),
+            decoration: InputDecoration(labelText: l10n.t('xtream_user'), border: const OutlineInputBorder()),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _xtreamPassController,
             obscureText: true,
-            decoration: const InputDecoration(labelText: 'Passwort', border: OutlineInputBorder()),
+            decoration: InputDecoration(labelText: l10n.t('xtream_pass'), border: const OutlineInputBorder()),
           ),
         ],
       ),
