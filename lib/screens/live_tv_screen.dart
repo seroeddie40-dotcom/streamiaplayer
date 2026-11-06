@@ -40,7 +40,7 @@ class _ChannelTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DpadFocusable(
-      effects: StreamiaFocus.card,
+      effect: StreamiaFocus.card,
       onSelect: () => Navigator.push(context,
           MaterialPageRoute(builder: (_) => PlayerScreen(channel: channel, isLive: true))),
       child: Container(
