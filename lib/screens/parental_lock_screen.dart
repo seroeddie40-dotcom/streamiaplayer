@@ -1,4 +1,4 @@
-imimport 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:dpad/dpad.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/storage/prefs_service.dart';
@@ -82,7 +82,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
             spacing: 12, runSpacing: 12,
             children: [
               ...List.generate(9, (i) => DpadFocusable(
-                effects: StreamiaFocus.card,
+                effects: [StreamiaFocus.card], // MIT eckigen Klammern
                 onSelect: () => _onDigit('${i + 1}'),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -91,7 +91,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                 ),
               )),
               DpadFocusable(
-                effects: StreamiaFocus.card,
+                effects: [StreamiaFocus.card], // MIT eckigen Klammern
                 onSelect: () => setState(() => _entered = ''),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -100,7 +100,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                 ),
               ),
               DpadFocusable(
-                effects: StreamiaFocus.card,
+                effects: [StreamiaFocus.card], // MIT eckigen Klammern
                 onSelect: () => _onDigit('0'),
                 child: Container(
                   width: 64, height: 64, alignment: Alignment.center,
@@ -132,7 +132,7 @@ class _ParentalLockScreenState extends State<ParentalLockScreen> {
                     itemBuilder: (context, i) {
                       final f = folders[i];
                       return DpadFocusable(
-                        effects: StreamiaFocus.card,
+                        effects: [StreamiaFocus.card], // MIT eckigen Klammern
                         onSelect: () async {
                           final newList = List<String>.from(folders)..remove(f);
                           await _prefs!.setLockedFolders(newList);
