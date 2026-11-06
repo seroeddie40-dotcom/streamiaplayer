@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import '../providers/auth_provider.dart';
 import '../providers/content_provider.dart';
@@ -36,7 +39,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
     _createQrSession();
   }
 
-  // Erstellt eine temporäre Online-Datenbank auf jsonblob.com
   Future<void> _createQrSession() async {
     try {
       final response = await http.post(
@@ -56,7 +58,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
     }
   }
 
-  // Prüft, ob auf der Webseite Daten eingegeben wurden
   Future<void> _checkForRemoteInput() async {
     if (_qrBlobId == null) return;
     try {
@@ -65,7 +66,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
         final data = jsonDecode(response.body);
         if (data['m3u'] != null && data['m3u'].isNotEmpty) {
           _processPlaylist(data['m3u']);
-          setState(() => _qrLink = null); // QR-Code ausblenden
+          setState(() => _qrLink = null);
         }
       }
     } catch (e) {
@@ -73,15 +74,27 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
     }
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _m3uController.dispose();
-    _epgController.dispose();
-    _xtreamServerController.dispose();
-    _xtreamUserController.dispose();
-    _xtreamPassController.dispose();
-    super.dispose();
+  Future<void> _pickFile(bool isM3u) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: isM3u ? ['m3u', 'm3u8'] : ['xml', 'gz'],
+      );
+      if (result != null && result.files.single.path != null) {
+        final content = await File(result.files.single.path!).readAsString();
+        setState(() {
+          if (isM3u) {
+            _m3uController.text = content;
+          } else {
+            _epgController.text = content;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      }
+    }
   }
 
   Future<void> _processPlaylist(String input) async {
@@ -105,6 +118,17 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _m3uController.dispose();
+    _epgController.dispose();
+    _xtreamServerController.dispose();
+    _xtreamUserController.dispose();
+    _xtreamPassController.dispose();
+    super.dispose();
   }
 
   @override
@@ -136,9 +160,9 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Schnelles Setup per Handy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            const Text('Handy-Setup', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            const Text('Scanne den Code, um die Playlist bequem über dein Handy einzugeben.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            const Text('Scanne den QR-Code, um die Daten bequem per Handy einzugeben.', style: TextStyle(fontSize: 12, color: Colors.grey)),
                             const SizedBox(height: 8),
                             Text('MAC: ${auth.macAddress}', style: const TextStyle(fontFamily: 'monospace', color: AppTheme.electricBlue)),
                             const SizedBox(height: 8),
@@ -245,24 +269,31 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Handy-Speicher öffnen...')));
-                  },
+                  onPressed: () => _pickFile(true),
                   icon: const Icon(Icons.folder_open),
-                  label: const Text('Vom Handy laden'),
+                  label: const Text('M3U vom Handy'),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('USB-Stick durchsuchen...')));
-                  },
-                  icon: const Icon(Icons.usb),
-                  label: const Text('Von USB laden'),
+                  onPressed: () => _pickFile(false),
+                  icon: const Icon(Icons.calendar_today),
+                  label: const Text('EPG vom Handy'),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('USB-Stick durchsuchen (benötigt Android TV) ...')));
+              },
+              icon: const Icon(Icons.usb),
+              label: const Text('Von USB-Stick laden (TV)'),
+            ),
           ),
         ],
       ),
