@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:dpad/dpad.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effects.dart';
 import '../providers/content_provider.dart';
 import '../models/vod_item.dart';
 import '../services/download_service.dart';
@@ -58,9 +56,8 @@ class _VodTileState extends State<_VodTile> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return DpadFocusable(
-      effect: StreamiaFocus.card,
-      onSelect: () => Navigator.push(context,
+    return InkWell(
+      onTap: () => Navigator.push(context,
           MaterialPageRoute(builder: (_) => PlayerScreen(
             streamUrl: widget.item.streamUrl,
             title: widget.item.title,
@@ -84,9 +81,8 @@ class _VodTileState extends State<_VodTile> {
                       : const Icon(Icons.movie, size: 48),
                   Positioned(
                     right: 8, top: 8,
-                    child: DpadFocusable(
-                      effect: StreamiaFocus.card,
-                      onSelect: _download,
+                    child: InkWell(
+                      onTap: _download,
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
