@@ -15,7 +15,7 @@ class AppLocalizations {
   ];
 
   static const localizationsDelegates = [
-    _AppLocalizationsDelegate(),
+    AppLocalizationsDelegate(),
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -35,9 +35,8 @@ class AppLocalizations {
   bool get isRtl => locale.languageCode == 'ar';
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
-  const _AppLocalizationsDelegate();
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  const AppLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) => AppLocalizations.supportedLocales
@@ -51,5 +50,5 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool shouldReload(_AppLocalizationsDelegate old) => false;
+  bool shouldReload(AppLocalizationsDelegate old) => false;
 }
