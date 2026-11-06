@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../core/localization/app_localizations.dart';
 import '../core/theme/app_theme.dart';
 import 'live_tv_screen.dart';
 import 'vod_screen.dart';
@@ -13,12 +14,14 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(context, isDark),
+            _buildTopBar(context, isDark, l10n),
             const SizedBox(height: 24),
             Expanded(
               child: Padding(
@@ -27,15 +30,15 @@ class DashboardScreen extends StatelessWidget {
                   crossAxisCount: 3,
                   mainAxisSpacing: 24, crossAxisSpacing: 24, childAspectRatio: 1.6,
                   children: [
-                    _DashboardTile(icon: Icons.live_tv, label: 'Live TV',
+                    _DashboardTile(icon: Icons.live_tv, label: l10n.t('nav_live'),
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LiveTvScreen()))),
-                    _DashboardTile(icon: Icons.movie, label: 'VOD',
+                    _DashboardTile(icon: Icons.movie, label: l10n.t('nav_vod'),
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VodScreen()))),
-                    _DashboardTile(icon: Icons.video_library, label: 'Series',
+                    _DashboardTile(icon: Icons.video_library, label: l10n.t('nav_series'),
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SeriesScreen()))),
-                    _DashboardTile(icon: Icons.grid_view, label: 'Multi-Screen', onTap: () {}),
-                    _DashboardTile(icon: Icons.replay, label: 'Catch-Up', onTap: () {}),
-                    _DashboardTile(icon: Icons.search, label: 'Master Search', onTap: () {}),
+                    _DashboardTile(icon: Icons.grid_view, label: l10n.t('nav_multi'), onTap: () {}),
+                    _DashboardTile(icon: Icons.replay, label: l10n.t('nav_catchup'), onTap: () {}),
+                    _DashboardTile(icon: Icons.search, label: l10n.t('nav_search'), onTap: () {}),
                   ],
                 ),
               ),
@@ -46,7 +49,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBar(BuildContext context, bool isDark) {
+  Widget _buildTopBar(BuildContext context, bool isDark, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
       child: Row(
@@ -59,14 +62,14 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          const Text('Streamia Player', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(l10n.t('app_name'), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const Spacer(),
           InkWell(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PaywallScreen())),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(gradient: AppTheme.accentGradient, borderRadius: BorderRadius.circular(8)),
-              child: const Text('PRO', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text(l10n.t('nav_pro'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(width: 16),
