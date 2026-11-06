@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../providers/auth_provider.dart';
 import '../providers/content_provider.dart';
 import '../services/playlist_parser.dart';
@@ -19,17 +21,56 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
   
   final TextEditingController _m3uController = TextEditingController();
   final TextEditingController _epgController = TextEditingController();
-  
   final TextEditingController _xtreamServerController = TextEditingController();
   final TextEditingController _xtreamUserController = TextEditingController();
   final TextEditingController _xtreamPassController = TextEditingController();
 
   bool _isLoading = false;
+  String? _qrLink;
+  String? _qrBlobId;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _createQrSession();
+  }
+
+  // Erstellt eine temporäre Online-Datenbank auf jsonblob.com
+  Future<void> _createQrSession() async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://jsonblob.com/api/jsonBlob'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'m3u': '', 'epg': ''}),
+      );
+      if (response.statusCode == 201) {
+        final blobId = response.headers['location']?.split('/').last;
+        setState(() {
+          _qrBlobId = blobId;
+          _qrLink = 'https://jsonblob.com/$blobId';
+        });
+      }
+    } catch (e) {
+      debugPrint('QR-Erstellung fehlgeschlagen: $e');
+    }
+  }
+
+  // Prüft, ob auf der Webseite Daten eingegeben wurden
+  Future<void> _checkForRemoteInput() async {
+    if (_qrBlobId == null) return;
+    try {
+      final response = await http.get(Uri.parse('https://jsonblob.com/api/jsonBlob/$_qrBlobId'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['m3u'] != null && data['m3u'].isNotEmpty) {
+          _processPlaylist(data['m3u']);
+          setState(() => _qrLink = null); // QR-Code ausblenden
+        }
+      }
+    } catch (e) {
+      debugPrint('Fehler beim Prüfen: $e');
+    }
   }
 
   @override
@@ -69,7 +110,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final pairingUrl = 'https://streamia.app/pair?mac=${Uri.encodeComponent(auth.macAddress)}';
 
     return Scaffold(
       appBar: AppBar(
@@ -80,35 +120,39 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
         ? const Center(child: CircularProgressIndicator())
         : Column(
             children: [
-              // QR-Code Bereich
-              Container(
-                padding: const EdgeInsets.all(16),
-                color: AppTheme.darkSurface,
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      color: Colors.white,
-                      child: QrImageView(data: pairingUrl, size: 80),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Schnelles Setup per Handy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          const Text('Scanne den Code mit deinem Handy, um die Playlist bequem einzugeben.', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 8),
-                          Text('MAC: ${auth.macAddress}', style: const TextStyle(fontFamily: 'monospace', color: AppTheme.electricBlue)),
-                        ],
+              if (_qrLink != null)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: AppTheme.darkSurface,
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        color: Colors.white,
+                        child: QrImageView(data: _qrLink!, size: 80),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Schnelles Setup per Handy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            const Text('Scanne den Code, um die Playlist bequem über dein Handy einzugeben.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            const SizedBox(height: 8),
+                            Text('MAC: ${auth.macAddress}', style: const TextStyle(fontFamily: 'monospace', color: AppTheme.electricBlue)),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: _checkForRemoteInput,
+                              child: const Text('Daten vom Handy abrufen'),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               
-              // Tabs
               TabBar(
                 controller: _tabController,
                 indicatorColor: AppTheme.electricBlue,
@@ -120,7 +164,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 ],
               ),
               
-              // Tab-Inhalte
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
@@ -131,7 +174,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 ),
               ),
               
-              // Speichern Button
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
@@ -146,8 +188,9 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                       if (_tabController.index == 0 && _m3uController.text.isNotEmpty) {
                         _processPlaylist(_m3uController.text);
                       } else if (_tabController.index == 1 && _xtreamServerController.text.isNotEmpty) {
-                         // Hier später Xtream-Logik einbauen
                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Xtream wird geladen...')));
+                      } else {
+                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bitte Daten eingeben')));
                       }
                     },
                     child: const Text('Speichern & Starten', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
