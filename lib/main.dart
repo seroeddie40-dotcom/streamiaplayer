@@ -14,10 +14,12 @@ import 'core/storage/prefs_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  
+  // Standardmäßig Hochformat für das Setup
   await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
+    DeviceOrientation.portraitUp,
   ]);
+
   final prefs = await SharedPreferences.getInstance();
   final prefsService = PrefsService(prefs);
   runApp(
