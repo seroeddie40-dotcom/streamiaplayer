@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/localization/app_localizations.dart';
@@ -45,6 +46,11 @@ class StreamiaApp extends StatelessWidget {
     if (!content.isLoaded) {
       return const SetupScreen();
     }
+    // Ab hier sind wir im Dashboard -> Querformat
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     return const DashboardScreen();
   }
 }
