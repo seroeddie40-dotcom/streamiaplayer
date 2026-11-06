@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -40,6 +39,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
     _createQrSession();
   }
 
+  // Erstellt eine temporäre Online-Datenbank auf jsonblob.com und generiert den Link
   Future<void> _createQrSession() async {
     try {
       final response = await http.post(
@@ -51,6 +51,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
         final blobId = response.headers['location']?.split('/').last;
         setState(() {
           _qrBlobId = blobId;
+          // Der Link, der im QR-Code steckt
           _qrLink = 'https://jsonblob.com/$blobId';
         });
       }
@@ -59,8 +60,10 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
     }
   }
 
+  // Fragt die Daten ab, die der Nutzer auf der Handy-Webseite eingegeben hat
   Future<void> _checkForRemoteInput() async {
     if (_qrBlobId == null) return;
+    setState(() => _isLoading = true);
     try {
       final response = await http.get(Uri.parse('https://jsonblob.com/api/jsonBlob/$_qrBlobId'));
       if (response.statusCode == 200) {
@@ -68,10 +71,16 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
         if (data['m3u'] != null && data['m3u'].isNotEmpty) {
           _processPlaylist(data['m3u']);
           setState(() => _qrLink = null);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Noch keine Daten auf der Webseite eingegeben!')),
+          );
         }
       }
     } catch (e) {
       debugPrint('Fehler beim Prüfen: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -167,11 +176,12 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 ),
               ),
               
+              // DER SPEICHERN BUTTON
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 55,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.electricBlue,
@@ -186,7 +196,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bitte Daten eingeben')));
                       }
                     },
-                    child: Text(l10n.t('btn_start'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    child: Text(l10n.t('btn_start'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                 ),
               ),
@@ -201,6 +211,50 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // DER QR-CODE BEREICH (Jetzt ganz oben)
+          if (_qrLink != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.darkSurface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.electricBlue.withOpacity(0.5)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.white,
+                    child: QrImageView(data: _qrLink!, size: 100),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l10n.t('qr_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                        const SizedBox(height: 4),
+                        Text(l10n.t('qr_desc'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        const SizedBox(height: 8),
+                        Text('MAC: ${auth.macAddress}', style: const TextStyle(fontFamily: 'monospace', color: AppTheme.electricBlue, fontSize: 12)),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.electricBlue,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: Size.zero,
+                          ),
+                          onPressed: _checkForRemoteInput,
+                          child: Text(l10n.t('qr_btn'), style: const TextStyle(fontSize: 12, color: Colors.white)),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           Text(l10n.t('m3u_url'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
           TextField(
@@ -240,7 +294,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 child: OutlinedButton.icon(
                   onPressed: () => _pickFile(true),
                   icon: const Icon(Icons.folder_open),
-                  label: Text(l10n.t('btn_m3u_phone')),
+                  label: Text(l10n.t('btn_m3u_phone'), textAlign: TextAlign.center),
                 ),
               ),
               const SizedBox(width: 16),
@@ -248,7 +302,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 child: OutlinedButton.icon(
                   onPressed: () => _pickFile(false),
                   icon: const Icon(Icons.calendar_today),
-                  label: Text(l10n.t('btn_epg_phone')),
+                  label: Text(l10n.t('btn_epg_phone'), textAlign: TextAlign.center),
                 ),
               ),
             ],
@@ -264,42 +318,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
               label: Text(l10n.t('btn_usb')),
             ),
           ),
-          const SizedBox(height: 32),
-          
-          if (_qrLink != null)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.darkSurface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.electricBlue.withOpacity(0.3)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    color: Colors.white,
-                    child: QrImageView(data: _qrLink!, size: 80),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l10n.t('qr_title'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text(l10n.t('qr_desc'), style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: _checkForRemoteInput,
-                          child: Text(l10n.t('qr_btn')),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );
