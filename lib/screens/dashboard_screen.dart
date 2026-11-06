@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:dpad/dpad.dart';
 import '../providers/theme_provider.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effects.dart';
 import 'live_tv_screen.dart';
 import 'vod_screen.dart';
 import 'series_screen.dart';
@@ -63,9 +61,8 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(width: 16),
           const Text('Streamia Player', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const Spacer(),
-          DpadFocusable(
-            effect: StreamiaFocus.card,
-            onSelect: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PaywallScreen())),
+          InkWell(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PaywallScreen())),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(gradient: AppTheme.accentGradient, borderRadius: BorderRadius.circular(8)),
@@ -73,15 +70,13 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          DpadFocusable(
-            effect: StreamiaFocus.card,
-            onSelect: () => context.read<ThemeProvider>().toggleTheme(),
+          InkWell(
+            onTap: () => context.read<ThemeProvider>().toggleTheme(),
             child: Icon(isDark ? Icons.light_mode : Icons.dark_mode, size: 28),
           ),
           const SizedBox(width: 16),
-          DpadFocusable(
-            effect: StreamiaFocus.card,
-            onSelect: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+          InkWell(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
             child: const Icon(Icons.settings, size: 28),
           ),
         ],
@@ -99,9 +94,8 @@ class _DashboardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return DpadFocusable(
-      effect: StreamiaFocus.card,
-      onSelect: onTap,
+    return InkWell(
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: isDark ? AppTheme.darkSurface : AppTheme.lightSurface,
