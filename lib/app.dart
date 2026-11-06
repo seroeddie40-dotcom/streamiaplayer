@@ -39,17 +39,12 @@ class StreamiaApp extends StatelessWidget {
   }
 
   Widget _resolveHome(LocaleProvider locale, ContentProvider content) {
-    // 1. Sprache noch nicht gewählt -> Sprachauswahl
     if (!locale.hasSelectedLanguage) {
       return const LanguageSelectionScreen();
     }
-    
-    // 2. Sprache gewählt, aber keine Playlist geladen -> Setup Screen
     if (!content.isLoaded) {
       return const SetupScreen();
     }
-    
-    // 3. Alles bereit -> Dashboard
     return const DashboardScreen();
   }
 }
