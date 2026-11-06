@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:dpad/dpad.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/focus_effects.dart';
 import '../providers/content_provider.dart';
 import '../models/series.dart';
 import '../services/download_service.dart';
@@ -38,9 +36,8 @@ class _SeriesTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return DpadFocusable(
-      effect: StreamiaFocus.card,
-      onSelect: () => Navigator.push(context,
+    return InkWell(
+      onTap: () => Navigator.push(context,
           MaterialPageRoute(builder: (_) => SeriesDetailScreen(series: series))),
       child: Container(
         decoration: BoxDecoration(
@@ -137,9 +134,8 @@ class _SeasonSection extends StatelessWidget {
               Text('Staffel ${season.number}',
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const Spacer(),
-              DpadFocusable(
-                effect: StreamiaFocus.card,
-                onSelect: () => _downloadSeason(context),
+              InkWell(
+                onTap: () => _downloadSeason(context),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -158,9 +154,8 @@ class _SeasonSection extends StatelessWidget {
             ],
           ),
         ),
-        ...season.episodes.map((ep) => DpadFocusable(
-          effect: StreamiaFocus.card,
-          onSelect: () => Navigator.push(context,
+        ...season.episodes.map((ep) => InkWell(
+          onTap: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => PlayerScreen(
                 episodes: season.episodes,
                 initialEpisodeIndex: season.episodes.indexOf(ep),
@@ -170,9 +165,8 @@ class _SeasonSection extends StatelessWidget {
           child: ListTile(
             leading: CircleAvatar(child: Text('${ep.number}')),
             title: Text(ep.title),
-            trailing: DpadFocusable(
-              effect: StreamiaFocus.card,
-              onSelect: () async {
+            trailing: InkWell(
+              onTap: () async {
                 try {
                   await DownloadService.download(
                     url: ep.streamUrl,
