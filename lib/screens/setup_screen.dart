@@ -62,7 +62,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
             _xtreamPassController.text = d3;
           });
           _tabController.animateTo(2);
-          // Hier später Xtream-Logik aufrufen
         }
       }
     }, langCode);
@@ -74,13 +73,16 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
   }
 
   Future<void> _pickFile(bool isM3u) async {
+    setState(() => _isLoading = true);
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: isM3u ? ['m3u', 'm3u8'] : ['xml', 'gz'],
+        withData: true, // Wichtig für stabile Android-Kompatibilität
       );
-      if (result != null && result.files.single.path != null) {
-        final content = await File(result.files.single.path!).readAsString();
+      
+      if (result != null && result.files.single.bytes != null) {
+        final content = String.fromCharCodes(result.files.single.bytes!);
         setState(() {
           if (isM3u) {
             _m3uController.text = content;
@@ -91,8 +93,12 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fehler: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler beim Laden der Datei: $e')),
+        );
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -143,7 +149,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
         automaticallyImplyLeading: false,
         bottom: TabBar(
           controller: _tabController,
-          isScrollable: true, // Wichtig, damit die Tabs ganz lesbar sind
+          isScrollable: true,
           indicatorColor: AppTheme.electricBlue,
           labelColor: AppTheme.electricBlue,
           unselectedLabelColor: Colors.grey,
