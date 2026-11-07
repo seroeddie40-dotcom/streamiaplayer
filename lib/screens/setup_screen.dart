@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:file_picker/file_picker.dart';
@@ -9,6 +7,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import '../providers/auth_provider.dart';
 import '../providers/content_provider.dart';
 import '../services/playlist_parser.dart';
+import '../services/tv_server.dart';
 import '../core/localization/app_localizations.dart';
 import '../core/theme/app_theme.dart';
 import 'dashboard_screen.dart';
@@ -31,23 +30,35 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
 
   bool _isLoading = false;
   String? _ipAddress;
-  String? _macAddress;
+  String? _qrLink;
 
   @override
   void initState() {
     super.initState();
-    // 3 Tabs: QR, M3U/EPG, Xtream
     _tabController = TabController(length: 3, vsync: this);
-    _getNetworkInfo();
+    _initServer();
   }
 
-  Future<void> _getNetworkInfo() async {
+  Future<void> _initServer() async {
     final info = NetworkInfo();
     final ip = await info.getWifiIP();
-    final auth = context.read<AuthProvider>();
+    
+    // Startet den lokalen Webserver auf dem TV
+    final serverIp = await TvServer.start((m3u, epg) {
+      if (mounted) {
+        setState(() {
+          _m3uController.text = m3u;
+          if (epg.isNotEmpty) _epgController.text = epg;
+        });
+        // Wechselt automatisch zum M3U Tab und startet den Ladevorgang
+        _tabController.animateTo(1);
+        _processPlaylist(m3u);
+      }
+    });
+
     setState(() {
-      _ipAddress = ip ?? '127.0.0.1';
-      _macAddress = auth.macAddress;
+      _ipAddress = serverIp ?? ip ?? '127.0.0.1';
+      _qrLink = 'http://$_ipAddress:8080';
     });
   }
 
@@ -75,6 +86,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
   }
 
   Future<void> _processPlaylist(String input) async {
+    if (input.isEmpty) return;
     setState(() => _isLoading = true);
     try {
       final contentProvider = context.read<ContentProvider>();
@@ -99,6 +111,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
 
   @override
   void dispose() {
+    TvServer.stop();
     _tabController.dispose();
     _m3uController.dispose();
     _epgController.dispose();
@@ -143,46 +156,43 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
   }
 
   Widget _buildQrTab(AuthProvider auth, AppLocalizations l10n) {
-    // Die Daten, die im QR-Code stecken. 
-    // Wenn du später eine Handy-App baust, liest diese diesen String.
-    final qrData = 'streamia://pair?mac=${auth.macAddress}&ip=$_ipAddress';
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           const SizedBox(height: 20),
           const Text(
-            'Scanne diesen Code mit deinem Handy',
+            'Setup per Handy',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           const Text(
-            'Öffne die Streamia App auf deinem Handy, um die Playlist zu übertragen.',
+            'Scanne den QR-Code mit deiner Handy-Kamera. Es öffnet sich eine Seite, auf der du deine M3U eingeben kannst.',
             style: TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
           
-          // Der echte QR-Code
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: QrImageView(
-              data: qrData,
-              version: QrVersions.auto,
-              size: 250,
-              backgroundColor: Colors.white,
-            ),
-          ),
-          
+          if (_qrLink != null)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: QrImageView(
+                data: _qrLink!,
+                version: QrVersions.auto,
+                size: 250,
+                backgroundColor: Colors.white,
+              ),
+            )
+          else
+            const CircularProgressIndicator(),
+
           const SizedBox(height: 32),
           
-          // Info-Karten
           Card(
             color: AppTheme.darkSurface,
             child: Padding(
@@ -191,7 +201,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 children: [
                   ListTile(
                     leading: const Icon(Icons.wifi, color: AppTheme.electricBlue),
-                    title: const Text('IP-Adresse'),
+                    title: const Text('Lokale IP'),
                     subtitle: Text(_ipAddress ?? 'Lade...', style: const TextStyle(fontFamily: 'monospace')),
                   ),
                   const Divider(),
@@ -203,20 +213,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 ],
               ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          const Text(
-            'Alternativ kannst du die Playlist direkt am TV eingeben:',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.electricBlue),
-            onPressed: () => _tabController.animateTo(1),
-            icon: const Icon(Icons.edit, color: Colors.white),
-            label: const Text('Manuell eingeben (M3U)', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -233,6 +229,7 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
           const SizedBox(height: 8),
           TextField(
             controller: _m3uController,
+            maxLines: 3,
             decoration: const InputDecoration(
               hintText: 'http://example.com/playlist.m3u',
               border: OutlineInputBorder(),
@@ -253,17 +250,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
           const SizedBox(height: 32),
           Row(
             children: [
-              const Expanded(child: Divider()),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(l10n.t('or'), style: const TextStyle(color: Colors.grey)),
-              ),
-              const Expanded(child: Divider()),
-            ],
-          ),
-          const SizedBox(height: 32),
-          Row(
-            children: [
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _pickFile(true),
@@ -280,17 +266,6 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('USB-Stick durchsuchen...')));
-              },
-              icon: const Icon(Icons.usb),
-              label: Text(l10n.t('btn_usb')),
-            ),
           ),
           const SizedBox(height: 32),
           SizedBox(
