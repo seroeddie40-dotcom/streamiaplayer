@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/content_provider.dart';
 import '../services/playlist_parser.dart';
 import '../services/tv_server.dart';
@@ -42,19 +43,29 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
   Future<void> _initServer() async {
     final info = NetworkInfo();
     final ip = await info.getWifiIP();
-    
-    // Startet den lokalen Webserver auf dem TV
-    final serverIp = await TvServer.start((m3u, epg) {
+    final localeProvider = context.read<LocaleProvider>();
+    final langCode = localeProvider.locale.languageCode;
+
+    final serverIp = await TvServer.start((type, d1, d2, d3) {
       if (mounted) {
-        setState(() {
-          _m3uController.text = m3u;
-          if (epg.isNotEmpty) _epgController.text = epg;
-        });
-        // Wechselt automatisch zum M3U Tab und startet den Ladevorgang
-        _tabController.animateTo(1);
-        _processPlaylist(m3u);
+        if (type == 'm3u') {
+          setState(() {
+            _m3uController.text = d1;
+            if (d2.isNotEmpty) _epgController.text = d2;
+          });
+          _tabController.animateTo(1);
+          _processPlaylist(d1);
+        } else {
+          setState(() {
+            _xtreamServerController.text = d1;
+            _xtreamUserController.text = d2;
+            _xtreamPassController.text = d3;
+          });
+          _tabController.animateTo(2);
+          // Hier später Xtream-Logik aufrufen
+        }
       }
-    });
+    }, langCode);
 
     setState(() {
       _ipAddress = serverIp ?? ip ?? '127.0.0.1';
@@ -132,13 +143,14 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
         automaticallyImplyLeading: false,
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true, // Wichtig, damit die Tabs ganz lesbar sind
           indicatorColor: AppTheme.electricBlue,
           labelColor: AppTheme.electricBlue,
           unselectedLabelColor: Colors.grey,
-          tabs: const [
-            Tab(icon: Icon(Icons.qr_code), text: 'QR-Setup'),
-            Tab(text: 'M3U / EPG'),
-            Tab(text: 'Xtream Codes'),
+          tabs: [
+            Tab(icon: const Icon(Icons.qr_code), text: l10n.t('tab_qr')),
+            Tab(text: l10n.t('tab_m3u')),
+            Tab(text: l10n.t('tab_xtream')),
           ],
         ),
       ),
@@ -161,15 +173,15 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
       child: Column(
         children: [
           const SizedBox(height: 20),
-          const Text(
-            'Setup per Handy',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          Text(
+            l10n.t('qr_title'),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Scanne den QR-Code mit deiner Handy-Kamera. Es öffnet sich eine Seite, auf der du deine M3U eingeben kannst.',
-            style: TextStyle(color: Colors.grey),
+          Text(
+            l10n.t('qr_desc'),
+            style: const TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -201,18 +213,26 @@ class _SetupScreenState extends State<SetupScreen> with SingleTickerProviderStat
                 children: [
                   ListTile(
                     leading: const Icon(Icons.wifi, color: AppTheme.electricBlue),
-                    title: const Text('Lokale IP'),
+                    title: Text(l10n.t('local_ip')),
                     subtitle: Text(_ipAddress ?? 'Lade...', style: const TextStyle(fontFamily: 'monospace')),
                   ),
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.devices, color: AppTheme.electricBlue),
-                    title: const Text('MAC-Adresse'),
+                    title: Text(l10n.t('mac_address')),
                     subtitle: Text(auth.macAddress, style: const TextStyle(fontFamily: 'monospace')),
                   ),
                 ],
               ),
             ),
+          ),
+          
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.electricBlue),
+            onPressed: () => _tabController.animateTo(1),
+            icon: const Icon(Icons.edit, color: Colors.white),
+            label: Text(l10n.t('qr_btn_manual'), style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
